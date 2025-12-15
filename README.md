@@ -18,6 +18,8 @@
 Surgery is a simple CLI to interact with Real Debrid. The aim is to allow user to fuzzy match and download files
 from their Real Debrid account.
 
+The project is not yet complete, I'm currently just setting the project up
+
 ---
 
 ## ❖ Installation
