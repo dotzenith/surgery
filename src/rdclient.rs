@@ -1,4 +1,4 @@
-use crate::data::User;
+use crate::data::SimpleTorrent;
 use anyhow::{Context, Result};
 use std::env;
 use ureq::Agent;
@@ -23,9 +23,9 @@ impl RDClient {
         })
     }
 
-    pub fn get_username(&self) -> Result<String> {
-        let request_url = Url::parse(&format!("{}/user", self.base_url,))?;
-        let response: User = self
+    pub fn get_torrents(&self) -> Result<Vec<SimpleTorrent>> {
+        let request_url = Url::parse(&format!("{}/torrents", self.base_url))?;
+        let response: Vec<SimpleTorrent> = self
             .agent
             .get(request_url.as_ref())
             .header("Authorization", format!("Bearer {}", self.api_key))
@@ -33,6 +33,6 @@ impl RDClient {
             .body_mut()
             .read_json()?;
 
-        Ok(response.username)
+        Ok(response)
     }
 }
