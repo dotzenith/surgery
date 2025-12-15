@@ -13,6 +13,8 @@ struct Cli {
 
 fn main() {
 
+    let _cli = Cli::parse();
+
     let client: RDClient = match RDClient::new() {
         Ok(client) => client,
         Err(err) => {
@@ -20,8 +22,6 @@ fn main() {
             std::process::exit(1)
         }
     };
-
-    let _cli = Cli::parse();
 
     match client.get_username() {
         Ok(user) => println!("Hi! {}", user),
