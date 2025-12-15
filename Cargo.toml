@@ -20,6 +20,10 @@ ureq = { version = "3.1.4", features = ["json"] }
 url = "2.5.7"
 
 [profile.release]
-lto = true
+lto = "thin"
 panic = "abort"
 strip = true
+
+# The profile that 'dist' will build with
+[profile.dist]
+inherits = "release"
