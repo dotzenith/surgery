@@ -44,14 +44,12 @@ fn main() {
     };
 
     let names: Vec<&str> = torrents.iter().map(|item| item.filename.as_str()).collect();
-    let needle = cli.name.replace(" ", "");
 
-    let matches = pattern::Atom::new(
-        &needle,
+    let matches = pattern::Pattern::new(
+        &cli.name,
         pattern::CaseMatching::Ignore,
         pattern::Normalization::Smart,
         pattern::AtomKind::Fuzzy,
-        true,
     )
     .match_list(&names, &mut matcher);
 
