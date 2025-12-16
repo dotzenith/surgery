@@ -122,7 +122,7 @@ srg "ubuntu" --best --all
 
 ## ❖ What's New?
 
-1.1.0 - Rename binary to `srg`
+1.1.1 - Improvements to the UI
 
 ---
 
