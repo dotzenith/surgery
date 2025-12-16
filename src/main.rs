@@ -5,6 +5,7 @@ use clap::Parser;
 use nucleo_matcher::{Config, Matcher, pattern};
 use rdclient::{RDClient, UnrestrictedLink};
 use std::io::{self, Write};
+use std::process::Command;
 
 #[derive(Parser)]
 #[command(name = "sg")]
@@ -25,6 +26,18 @@ struct Cli {
 
 fn main() {
     let cli = Cli::parse();
+    match Command::new("curl")
+        .arg("--version")
+        .output()
+        .map(|output| output.status.success())
+        .unwrap_or(false)
+    {
+        true => (),
+        false => {
+            eprintln!("curl not installed or not in path. Please install curl and try again");
+            std::process::exit(1)
+        }
+    }
     let mut matcher = Matcher::new(Config::DEFAULT.match_paths());
 
     let client: RDClient = match RDClient::new() {
@@ -119,5 +132,12 @@ fn main() {
         &links.get(left..=right).expect("Invalid Range")
     };
 
-    println!("{:?}", download);
+    for link in download.into_iter() {
+        Command::new("curl")
+            .arg(&link.download)
+            .arg("--output")
+            .arg(&link.filename)
+            .status()
+            .expect("Unable to call curl");
+    }
 }
