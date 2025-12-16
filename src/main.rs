@@ -8,7 +8,7 @@ use std::io::{self, Write};
 use std::process::Command;
 
 #[derive(Parser)]
-#[command(name = "sg")]
+#[command(name = "srg")]
 #[command(about, version, author)]
 
 struct Cli {

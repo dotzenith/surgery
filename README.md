@@ -65,7 +65,7 @@ Pre-Compiled binaries for linux, mac, and windows are available in [Releases](ht
 git clone https://github.com/dotzenith/surgery.git
 cd surgery
 cargo build --release
-./target/release/sg
+./target/release/srg
 ```
 
 ---
@@ -75,7 +75,7 @@ cargo build --release
 ```
 A simple CLI for Real Debrid
 
-Usage: sg [OPTIONS] <NAME>
+Usage: srg [OPTIONS] <NAME>
 
 Arguments:
   <NAME>  torrent name for fuzzy matching (required)
@@ -90,7 +90,7 @@ Options:
 ### Normal Usage
 
 ```sh
-sg "debian" # torrent names are fuzzy matched
+srg "debian" # torrent names are fuzzy matched
 ```
 - This will prompt the user to select a specific torrent if there is more than one match
 - This will also prompt the user to select a range if the torrent has multiple files
@@ -98,7 +98,7 @@ sg "debian" # torrent names are fuzzy matched
 ### Pick the best matched torrent
 
 ```sh
-sg "ubuntu" --best
+srg "ubuntu" --best
 ```
 - This will pick the torrent that best matches the search string 
 - This will still prompt the user to select a range if the torrent has multiple files
@@ -106,7 +106,7 @@ sg "ubuntu" --best
 ### Download all files for a given torrent
 
 ```sh
-sg "ubuntu" --all
+srg "ubuntu" --all
 ```
 - This will prompt the user to select a specific torrent if there is more than one match
 - This will download all files for the selected torrent
@@ -114,7 +114,7 @@ sg "ubuntu" --all
 ### 
 
 ```sh
-sg "ubuntu" --best --all
+srg "ubuntu" --best --all
 ```
 - This will pick the best matched torrent, and download all files
 
@@ -122,7 +122,7 @@ sg "ubuntu" --best --all
 
 ## ❖ What's New?
 
-1.0.0 - Initial release
+1.1.0 - Rename binary to `srg`
 
 ---
 
