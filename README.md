@@ -98,7 +98,7 @@ sg "debian" # torrent names are fuzzy matched
 ### Pick the best matched torrent
 
 ```sh
-sg "ubuntu" --best # torrent names are fuzzy matched
+sg "ubuntu" --best
 ```
 - This will pick the torrent that best matches the search string 
 - This will still prompt the user to select a range if the torrent has multiple files
@@ -106,7 +106,7 @@ sg "ubuntu" --best # torrent names are fuzzy matched
 ### Download all files for a given torrent
 
 ```sh
-sg "ubuntu" --all # torrent names are fuzzy matched
+sg "ubuntu" --all
 ```
 - This will prompt the user to select a specific torrent if there is more than one match
 - This will download all files for the selected torrent
@@ -114,7 +114,7 @@ sg "ubuntu" --all # torrent names are fuzzy matched
 ### 
 
 ```sh
-sg "ubuntu" --best --all # torrent names are fuzzy matched
+sg "ubuntu" --best --all
 ```
 - This will pick the best matched torrent, and download all files
 
