@@ -15,9 +15,9 @@ struct Cli {
     /// torrent name for fuzzy matching (required)
     name: String,
 
-    /// Download first/best matching torrent for the provided name
+    /// Download the best matching torrent for the provided name
     #[arg(short, long, default_value_t = false)]
-    first: bool,
+    best: bool,
 
     /// Download all files for the selected torrent
     #[arg(short, long, default_value_t = false)]
@@ -71,7 +71,7 @@ fn main() {
         std::process::exit(1)
     }
 
-    let torrent = if cli.first || matches.len() == 1 {
+    let torrent = if cli.best || matches.len() == 1 {
         torrents
             .iter()
             .find(|elem| elem.filename == *matches[0].0)
