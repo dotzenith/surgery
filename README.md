@@ -106,7 +106,7 @@ srg "ubuntu" --best
 ### Download all files for a given torrent
 
 ```sh
-srg "ubuntu" --all
+srg "arch" --all
 ```
 - This will prompt the user to select a specific torrent if there is more than one match
 - This will download all files for the selected torrent
@@ -114,7 +114,7 @@ srg "ubuntu" --all
 ### 
 
 ```sh
-srg "ubuntu" --best --all
+srg "gentoo" --best --all
 ```
 - This will pick the best matched torrent, and download all files
 
