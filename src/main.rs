@@ -1,9 +1,9 @@
-mod data;
 mod rdclient;
 
+use anyhow::Result;
 use clap::Parser;
 use nucleo_matcher::{Config, Matcher, pattern};
-use rdclient::RDClient;
+use rdclient::{RDClient, UnrestrictedLink};
 use std::io::{self, Write};
 
 #[derive(Parser)]
@@ -68,21 +68,56 @@ fn main() {
             println!("{}: {}", idx, item.0);
         }
         print!("\nPlease enter the torrent number to download: ");
-        io::stdout().flush().unwrap();
+        io::stdout().flush().expect("Failed to flush stdout");
 
         let mut input = String::new();
         io::stdin()
             .read_line(&mut input)
             .expect("Failed to read line");
 
-        let number: u32 = input.trim().parse().expect("Invalid number");
-
-        if number >= matches.len() as u32 {
-            eprintln!("Invalid number selected");
-            std::process::exit(1)
-        }
-        &torrents[number as usize]
+        let number: usize = input.trim().parse().expect("Invalid number");
+        &torrents.get(number).expect("Invalid number selected")
     };
 
-    println!("{:?}", torrent);
+    let links = match torrent
+        .links
+        .iter()
+        .map(|link| client.unrestrict_link(link))
+        .collect::<Result<Vec<UnrestrictedLink>>>()
+    {
+        Ok(links) => links,
+        Err(err) => {
+            eprintln!("Unable to unrestrict link: {}", err);
+            std::process::exit(1)
+        }
+    };
+
+    let download = if cli.all || links.len() == 1 {
+        &links[..]
+    } else {
+        for (idx, link) in links.iter().enumerate() {
+            println!("{}: {}", idx, link.filename)
+        }
+
+        print!("\nPlease enter a range to download (eg. 0-4): ");
+        io::stdout().flush().expect("Failed to flush stdout");
+
+        let mut input = String::new();
+        io::stdin()
+            .read_line(&mut input)
+            .expect("Failed to read line");
+
+        let split: Vec<&str> = input.split("-").collect();
+        if split.len() != 2 {
+            eprintln!("Invalid syntax for range");
+            std::process::exit(1)
+        }
+
+        let left: usize = split[0].trim().parse().expect("Invalid number");
+        let right: usize = split[1].trim().parse().expect("Invalid number");
+
+        &links.get(left..=right).expect("Invalid Range")
+    };
+
+    println!("{:?}", download);
 }

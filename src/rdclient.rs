@@ -1,8 +1,20 @@
-use crate::data::SimpleTorrent;
 use anyhow::{Context, Result};
+use serde::Deserialize;
 use std::env;
 use ureq::Agent;
 use url::Url;
+
+#[derive(Clone, Deserialize, Debug)]
+pub struct SimpleTorrent {
+    pub filename: String,
+    pub links: Vec<String>,
+}
+
+#[derive(Clone, Deserialize, Debug)]
+pub struct UnrestrictedLink {
+    pub filename: String,
+    pub download: String,
+}
 
 pub struct RDClient {
     base_url: String,
@@ -30,6 +42,21 @@ impl RDClient {
             .get(request_url.as_ref())
             .header("Authorization", format!("Bearer {}", self.api_key))
             .call()?
+            .body_mut()
+            .read_json()?;
+
+        Ok(response)
+    }
+
+    pub fn unrestrict_link(&self, link: &str) -> Result<UnrestrictedLink> {
+        let form = [("link", link)];
+
+        let request_url = Url::parse(&format!("{}/unrestrict/link", self.base_url))?;
+        let response: UnrestrictedLink = self
+            .agent
+            .post(request_url.as_ref())
+            .header("Authorization", format!("Bearer {}", self.api_key))
+            .send_form(form)?
             .body_mut()
             .read_json()?;
 
