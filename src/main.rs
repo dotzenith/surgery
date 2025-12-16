@@ -48,6 +48,7 @@ fn main() {
         }
     };
 
+    println!("Fetching torrents........");
     let torrents = match client.get_torrents() {
         Ok(torrents) => torrents,
         Err(err) => {
@@ -92,6 +93,7 @@ fn main() {
         &torrents.get(number).expect("Invalid number selected")
     };
 
+    println!("Unrestricting links......");
     let links = match torrent
         .links
         .iter()
@@ -132,8 +134,11 @@ fn main() {
         &links.get(left..=right).expect("Invalid Range")
     };
 
+    println!("\nDownloading..............\n");
     for link in download.into_iter() {
+        println!("{}", &link.filename);
         Command::new("curl")
+            .arg("--progress-bar")
             .arg(&link.download)
             .arg("--output")
             .arg(&link.filename)
