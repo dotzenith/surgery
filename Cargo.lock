@@ -648,7 +648,6 @@ dependencies = [
  "clap",
  "nucleo-matcher",
  "serde",
- "serde_json",
  "ureq",
  "url",
 ]
