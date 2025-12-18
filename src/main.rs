@@ -1,6 +1,6 @@
 mod rdclient;
 
-use anyhow::Result;
+use anyhow::{Context, Result, anyhow};
 use clap::Parser;
 use nucleo_matcher::{Config, Matcher, pattern};
 use rdclient::{RDClient, UnrestrictedLink};
@@ -24,8 +24,9 @@ struct Cli {
     all: bool,
 }
 
-fn main() {
+fn main() -> Result<()> {
     let cli = Cli::parse();
+
     match Command::new("curl")
         .arg("--version")
         .output()
@@ -38,25 +39,12 @@ fn main() {
             std::process::exit(1)
         }
     }
-    let mut matcher = Matcher::new(Config::DEFAULT.match_paths());
 
-    let client: RDClient = match RDClient::new() {
-        Ok(client) => client,
-        Err(err) => {
-            eprintln!("Unable to build RDClient: {}", err);
-            std::process::exit(1)
-        }
-    };
+    let mut matcher = Matcher::new(Config::DEFAULT.match_paths());
+    let client: RDClient = RDClient::new()?;
 
     println!("Fetching torrents........");
-    let torrents = match client.get_torrents() {
-        Ok(torrents) => torrents,
-        Err(err) => {
-            eprintln!("Unable to get torrents: {}", err);
-            std::process::exit(1)
-        }
-    };
-
+    let torrents = client.get_torrents()?;
     let names: Vec<&str> = torrents.iter().map(|item| item.filename.as_str()).collect();
 
     let matches = pattern::Pattern::new(
@@ -89,23 +77,17 @@ fn main() {
             .read_line(&mut input)
             .expect("Failed to read line");
 
-        let number: usize = input.trim().parse().expect("Invalid number");
-        &torrents.get(number).expect("Invalid number selected")
+        let number: usize = input.trim().parse().context("Invalid number")?;
+        &torrents.get(number).context("Invalid number selected")?
     };
 
     println!("Unrestricting links......");
-    let links = match torrent
+    let links = torrent
         .links
         .iter()
         .map(|link| client.unrestrict_link(link))
         .collect::<Result<Vec<UnrestrictedLink>>>()
-    {
-        Ok(links) => links,
-        Err(err) => {
-            eprintln!("Unable to unrestrict link: {}", err);
-            std::process::exit(1)
-        }
-    };
+        .map_err(|e| anyhow!("Unable to unrestrict link: {}", e))?;
 
     let download = if cli.all || links.len() == 1 {
         &links[..]
@@ -128,21 +110,28 @@ fn main() {
             std::process::exit(1)
         }
 
-        let left: usize = split[0].trim().parse().expect("Invalid number");
-        let right: usize = split[1].trim().parse().expect("Invalid number");
+        let left: usize = split[0].trim().parse().context("Invalid range")?;
+        let right: usize = split[1].trim().parse().context("Invalid range")?;
 
-        &links.get(left..=right).expect("Invalid Range")
+        &links.get(left..=right).context("Invalid range")?
     };
 
     println!("\nDownloading..............\n");
     for link in download.into_iter() {
         println!("{}", &link.filename);
-        Command::new("curl")
+
+        let status = Command::new("curl")
             .arg("--progress-bar")
             .arg(&link.download)
             .arg("--output")
             .arg(&link.filename)
             .status()
-            .expect("Unable to call curl");
+            .expect("Failed to execute curl");
+
+        if !status.success() {
+            eprintln!("Unable to download: {}", &link.filename);
+        }
     }
+
+    Ok(())
 }
