@@ -122,7 +122,7 @@ srg "gentoo" --best --all
 
 ## ❖ What's New?
 
-1.1.1 - Improvements to the UI
+1.1.2 - Better error handling
 
 ---
 
