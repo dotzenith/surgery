@@ -40,15 +40,16 @@ fn main() -> Result<()> {
         }
     }
 
-    let mut matcher = Matcher::new(Config::DEFAULT.match_paths());
+    let mut matcher = Matcher::new(Config::DEFAULT);
     let client: RDClient = RDClient::new()?;
 
     println!("Fetching torrents........");
     let torrents = client.get_torrents()?;
     let names: Vec<&str> = torrents.iter().map(|item| item.filename.as_str()).collect();
+    let cleaned_name: String = cli.name.chars().filter(|c| c.is_alphanumeric()).collect();
 
     let matches = pattern::Pattern::new(
-        &cli.name,
+        &cleaned_name,
         pattern::CaseMatching::Ignore,
         pattern::Normalization::Smart,
         pattern::AtomKind::Fuzzy,
