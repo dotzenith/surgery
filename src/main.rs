@@ -2,9 +2,10 @@ mod rdclient;
 
 use anyhow::{Context, Result, anyhow};
 use clap::Parser;
-use nucleo_matcher::{Config, Matcher, pattern};
 use rdclient::{RDClient, UnrestrictedLink};
-use std::io::{self, Write};
+use rustyline::DefaultEditor;
+use rustyline::error::ReadlineError;
+use skimple::SkimpleMatcher;
 use std::process::Command;
 
 #[derive(Parser)]
@@ -40,46 +41,43 @@ fn main() -> Result<()> {
         }
     }
 
-    let mut matcher = Matcher::new(Config::DEFAULT);
+    let matcher = SkimpleMatcher::default();
     let client: RDClient = RDClient::new()?;
+    let mut rl = DefaultEditor::new()?;
 
     println!("Fetching torrents........");
     let torrents = client.get_torrents()?;
     let names: Vec<&str> = torrents.iter().map(|item| item.filename.as_str()).collect();
     let cleaned_name: String = cli.name.chars().filter(|c| c.is_alphanumeric()).collect();
 
-    let matches = pattern::Pattern::new(
-        &cleaned_name,
-        pattern::CaseMatching::Ignore,
-        pattern::Normalization::Smart,
-        pattern::AtomKind::Fuzzy,
-    )
-    .match_list(&names, &mut matcher);
-
-    if matches.len() == 0 {
-        eprintln!("No matches found");
-        std::process::exit(1)
-    }
+    let matches = match cleaned_name.is_empty() {
+        true => names,
+        false => matcher.fuzzy_all(&names, &cleaned_name)?,
+    };
 
     let torrent = if cli.best || matches.len() == 1 {
         torrents
             .iter()
-            .find(|elem| elem.filename == *matches[0].0)
+            .find(|elem| elem.filename == *matches[0])
             .expect("Torrent somehow disappeared")
     } else {
         for (idx, item) in matches.iter().enumerate() {
-            println!("{}: {}", idx, item.0);
+            println!("{}: {}", idx, item);
         }
-        print!("\nPlease enter the torrent number to download: ");
-        io::stdout().flush().expect("Failed to flush stdout");
 
-        let mut input = String::new();
-        io::stdin()
-            .read_line(&mut input)
-            .expect("Failed to read line");
+        let input = match rl.readline("\nPlease enter the torrent number to download: ") {
+            Ok(number) => number,
+            Err(ReadlineError::Interrupted) => return Ok(()),
+            Err(ReadlineError::Eof) => return Ok(()),
+            Err(err) => return Err(err.into()),
+        };
 
         let number: usize = input.trim().parse().context("Invalid number")?;
-        &torrents.get(number).context("Invalid number selected")?
+        let name = matches.get(number).context("Invalid number selected")?;
+        torrents
+            .iter()
+            .find(|elem| elem.filename == *name)
+            .context("Torrent somehow disappeared")?
     };
 
     println!("Unrestricting links......");
@@ -97,13 +95,12 @@ fn main() -> Result<()> {
             println!("{}: {}", idx, link.filename)
         }
 
-        print!("\nPlease enter a range to download (eg. 0-4): ");
-        io::stdout().flush().expect("Failed to flush stdout");
-
-        let mut input = String::new();
-        io::stdin()
-            .read_line(&mut input)
-            .expect("Failed to read line");
+        let input = match rl.readline("\nPlease enter a range to download (eg. 0-4): ") {
+            Ok(number) => number,
+            Err(ReadlineError::Interrupted) => return Ok(()),
+            Err(ReadlineError::Eof) => return Ok(()),
+            Err(err) => return Err(err.into()),
+        };
 
         let split: Vec<&str> = input.split("-").collect();
         if split.len() != 2 {
