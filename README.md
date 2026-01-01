@@ -122,7 +122,7 @@ srg "gentoo" --best --all
 
 ## ❖ What's New?
 
-1.1.3 - Better Fuzzy Matching
+1.2.0 - Use `skimple` for fuzzy matching and use `rustyline` for user input
 
 ---
 
