@@ -1,18 +1,5 @@
 <h1 align="center"> ━━━━  ❖  ━━━━ </h1>
 
-<!-- BADGES -->
-<div align="center">
-   <p></p>
-
-   <img src="https://img.shields.io/github/stars/dotzenith/surgery?color=F8BD96&labelColor=302D41&style=for-the-badge">
-   <img src="https://img.shields.io/github/commit-activity/y/dotzenith/surgery?color=96CDFB&labelColor=302D41&style=for-the-badge&label=COMMITS"/>
-   <br>
-</div>
-
-<p/>
-
----
-
 ## ❖ Surgery
 
 Surgery is a simple CLI to interact with Real Debrid. The aim is to allow users to fuzzy match and download torrents
